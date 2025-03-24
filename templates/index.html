@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BMI Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+    button {
+      display: block;
+      width: 100%;
+      background: #4CAF50;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #e2f0d9;
+      border-radius: 3px;
+      display: none;
+    }
+  </style>
+  <script>
+    function submitForm(event) {
+      event.preventDefault();  // Prevent the form from submitting the default way
+      const form = document.getElementById('bmiForm');
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+      
+      // Send a POST request to the /calculate endpoint using form data (x-www-form-urlencoded)
+      fetch('/calculate', {
+        method: 'POST',
+        body: new URLSearchParams(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        const resultDiv = document.getElementById('result');
+        if (result.Response === "Successful") {
+          resultDiv.innerHTML = `<p><strong>BMI:</strong> ${result.BMI}</p>
+                                 <p><strong>Category:</strong> ${result.Category}</p>`;
+        } else {
+          resultDiv.innerHTML = `<p style="color:red;"><strong>Error:</strong> ${result.error || result.Error}</p>`;
+        }
+        resultDiv.style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>BMI Calculator</h1>
+    <form id="bmiForm" onsubmit="submitForm(event)" method="POST" action="/calculate">
+      <label for="weight">Weight (kg):</label>
+      <input type="number" step="any" id="weight" name="weight" required>
+
+      <label for="height">Height (m):</label>
+      <input type="number" step="any" id="height" name="height" required>
+
+      <button type="submit">Calculate BMI</button>
+    </form>
+    <div id="result"></div>
+  </div>
+</body>
+</html>
